@@ -327,6 +327,15 @@ err0:
  * ccache_remove(path):
  * Delete the chunkification cache from the directory ${path}.
  */
+/**
+ * ccache_remove(path):
+ * Delete the chunkification cache from the directory ${path}.
+ *
+ * Make the unlink durable by fsyncing the containing directory.
+ * This prevents the deleted cache from being resurrected after
+ * a power loss, which would defeat the purpose of invalidating
+ * a potentially damaged chunkification cache (e.g. after --fsck).
+ */
 int
 ccache_remove(const char * path)
 {
@@ -338,7 +347,7 @@ ccache_remove(const char * path)
 	/* Construct the name of the cache file. */
 	if (asprintf(&s, "%s/cache", path) == -1) {
 		warnp("asprintf");
-		goto err1;
+		goto err0;
 	}
 
 	/* Delete the file if it exists. */
@@ -347,7 +356,18 @@ ccache_remove(const char * path)
 			warnp("unlink(%s)", s);
 			goto err1;
 		}
+		/*
+		 * No file was removed; nothing to fsync.
+		 */
+		free(s);
+		return (0);
 	}
+
+	/*
+	 * Make the unlink durable by fsyncing the containing directory.
+	 */
+	if (dirutil_fsyncdir(path))
+		goto err1;
 
 	/* Free string allocated by asprintf. */
 	free(s);
@@ -357,7 +377,7 @@ ccache_remove(const char * path)
 
 err1:
 	free(s);
-
+err0:
 	/* Failure! */
 	return (-1);
 }

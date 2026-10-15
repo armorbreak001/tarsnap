@@ -100,6 +100,10 @@ tarsnap_mode_r(struct bsdtar *bsdtar)
 	if (readtape_close(d))
 		goto err1;
 
+	/* Flush buffered output so the caller sees complete data. */
+	if (fflush(stdout))
+		goto err1;
+
 	/* Success! */
 	return;
 

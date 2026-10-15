@@ -1390,6 +1390,9 @@ usage(struct bsdtar *bsdtar)
 	fprintf(stderr, "  Tar output:    %s [options...] -rf <archive>\n", p);
 	fprintf(stderr, "  List archives: %s [options...] --list-archives\n", p);
 	fprintf(stderr, "  Print stats:   %s [options...] --print-stats\n", p);
+	fprintf(stderr, "  Check:         %s [options...] --fsck\n", p);
+	fprintf(stderr, "  Prune:         %s [options...] --fsck-prune\n", p);
+	fprintf(stderr, "  Nuke:          %s [options...] --nuke\n", p);
 	fprintf(stderr, "  Help:    %s --help\n", p);
 	exit(1);
 }
@@ -1808,7 +1811,9 @@ dooption(struct bsdtar *bsdtar, const char * conf_opt,
 		    (bsdtar->bwlimit_rate_down < 8000) ||
 		    (bsdtar->bwlimit_rate_down > 1000000000.))
 			bsdtar_errc(bsdtar, 1, 0,
-			    "Invalid bandwidth rate limit: %s", conf_arg);
+			    "Invalid bandwidth rate limit: %s"
+			    " (must be 8000-1000000000 bytes/s)",
+			    conf_arg);
 		bsdtar->option_maxbw_rate_down_set = 1;
 	} else if (strcmp(conf_opt, "maxbw-rate-up") == 0) {
 		if (bsdtar->option_maxbw_rate_up_set)
@@ -1821,7 +1826,9 @@ dooption(struct bsdtar *bsdtar, const char * conf_opt,
 		    (bsdtar->bwlimit_rate_up < 8000) ||
 		    (bsdtar->bwlimit_rate_up > 1000000000.))
 			bsdtar_errc(bsdtar, 1, 0,
-			    "Invalid bandwidth rate limit: %s", conf_arg);
+			    "Invalid bandwidth rate limit: %s"
+			    " (must be 8000-1000000000 bytes/s)",
+			    conf_arg);
 		bsdtar->option_maxbw_rate_up_set = 1;
 	} else if (strcmp(conf_opt, "noatime") == 0) {
 		if (bsdtar->mode != 'c')

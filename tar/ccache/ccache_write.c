@@ -1,5 +1,6 @@
 #include "platform.h"
 
+#include <fcntl.h>
 #include <sys/stat.h>
 
 #include <assert.h>
@@ -348,6 +349,15 @@ ccache_remove(const char * path)
 		if (errno != ENOENT) {
 			warnp("unlink(%s)", s);
 			goto err1;
+		}
+	}
+
+	/* Sync the cache directory to make the deletion durable. */
+	{
+		int dirfd;
+		if ((dirfd = open(path, O_RDONLY)) >= 0) {
+			fsync(dirfd);
+			close(dirfd);
 		}
 	}
 
